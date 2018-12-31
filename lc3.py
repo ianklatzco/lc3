@@ -23,12 +23,10 @@ class lc3():
             _ = f.read(2) # skip the first two byte which specify where code should be mapped
             c = f.read()
         for count in range(0,len(c), 2):
-            self.memory[count] = unpack( '>H', c[count:count+2] )[0]
-            print(hex(self.memory[count]))
+            self.memory[0x3000+count/2] = unpack( '>H', c[count:count+2] )[0]
 
     def start(self):
         running = 1
-        return
         while running < 10:
             fetched_instruction = self.memory[self.registers.pc.value]
             print(hex(fetched_instruction))
