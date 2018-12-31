@@ -99,6 +99,16 @@ class lc3():
         print("r5: {:05} ".format(self.registers.gprs[5]), end='')
         print("r6: {:05} ".format(self.registers.gprs[6]), end='')
         print("r7: {:05} ".format(self.registers.gprs[7]))
+
+        print("r0: {:5} ".format(hex(c_uint16(self.registers.gprs[0]).value)[2:]), end='')
+        print("r1: {:5} ".format(hex(c_uint16(self.registers.gprs[1]).value)[2:]), end='')
+        print("r2: {:5} ".format(hex(c_uint16(self.registers.gprs[2]).value)[2:]), end='')
+        print("r3: {:5} ".format(hex(c_uint16(self.registers.gprs[3]).value)[2:]), end='')
+        print("r4: {:5} ".format(hex(c_uint16(self.registers.gprs[4]).value)[2:]), end='')
+        print("r5: {:5} ".format(hex(c_uint16(self.registers.gprs[5]).value)[2:]), end='')
+        print("r6: {:5} ".format(hex(c_uint16(self.registers.gprs[6]).value)[2:]), end='')
+        print("r7: {:5} ".format(hex(c_uint16(self.registers.gprs[7]).value)[2:]))
+
         print("cond: {}".format(condition_flags(self.registers.cond.value).name))
         exit()
     def op_res_impl(self, instruction):
