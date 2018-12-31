@@ -1,7 +1,9 @@
+# usage: python3 lc3.py ./second.obj
+
 from ctypes import c_uint16, c_int16
 from enum import IntEnum
 from struct import unpack
-from sys import exit, stdin, stdout
+from sys import exit, stdin, stdout, argv
 from signal import signal, SIGINT
 
 # https://justinmeiners.github.io/lc3-vm/
@@ -332,5 +334,8 @@ class lc3():
 
 ##############################################################################
 
-l = lc3("second.obj")
+if len(argv) < 2:
+    print ("usage: python3 lc3.py code.obj")
+    exit(255)
+l = lc3(argv[1])
 l.start()
