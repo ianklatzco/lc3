@@ -2,6 +2,7 @@
 // Scope level 0:
 //	Symbol Name       Page Address
 //	----------------  ------------
-//	neg               3009
-//	STRING            300B
+//	neg               3002
+//	STRING            3004
+//	AOEU              300A
 
