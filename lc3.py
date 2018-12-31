@@ -1,5 +1,5 @@
 from ctypes import c_uint16
-from enum import Enum
+from enum import IntEnum
 from binascii import *
 from struct import unpack
 
@@ -25,12 +25,82 @@ class lc3():
         for count in range(0,len(c), 2):
             self.memory[0x3000+count/2] = unpack( '>H', c[count:count+2] )[0]
 
+    def op_add_impl(self):
+        raise Error("unimplemented opcode")
+    def op_and_impl(self):
+        raise Error("unimplemented opcode")
+    def op_not_impl(self):
+        raise Error("unimplemented opcode")
+    def op_br_impl(self):
+        raise Error("unimplemented opcode")
+    def op_jmp_impl(self):
+        raise Error("unimplemented opcode")
+    def op_jsr_impl(self):
+        raise Error("unimplemented opcode")
+    def op_ld_impl(self):
+        raise Error("unimplemented opcode")
+    def op_ldr_impl(self):
+        raise Error("unimplemented opcode")
+    def op_lea_impl(self):
+        raise Error("unimplemented opcode")
+    def op_st_impl(self):
+        raise Error("unimplemented opcode")
+    def op_sti_impl(self):
+        raise Error("unimplemented opcode")
+    def op_str_impl(self):
+        raise Error("unimplemented opcode")
+    def op_trap_impl(self):
+        raise Error("unimplemented opcode")
+    def op_res_impl(self):
+        raise Error("unimplemented opcode")
+    def op_rti_impl(self):
+        raise Error("unimplemented opcode")
+
     def start(self):
         running = 1
         while running < 10:
+            # fetch instruction
             fetched_instruction = self.memory[self.registers.pc.value]
-            print(hex(fetched_instruction))
+
+            # update PC
             self.registers.pc.value = self.registers.pc.value + 1
+
+            # decode opcode
+            opcode = fetched_instruction >> 12
+
+            if opcode == opcodes.op_add:
+                self.op_add_impl()
+            elif opcode == opcodes.op_and:
+                self.op_and_impl()
+            elif opcode == opcodes.op_not:
+                self.op_not_impl()
+            elif opcode == opcodes.op_br:
+                self.op_br_impl()
+            elif opcode == opcodes.op_jmp:
+                self.op_jmp_impl()
+            elif opcode == opcodes.op_jsr:
+                self.op_jsr_impl()
+            elif opcode == opcodes.op_ld:
+                self.op_ld_impl()
+            elif opcode == opcodes.op_ldr:
+                self.op_ldr_impl()
+            elif opcode == opcodes.op_lea:
+                self.op_lea_impl()
+            elif opcode == opcodes.op_st:
+                self.op_st_impl()
+            elif opcode == opcodes.op_sti:
+                self.op_sti_impl()
+            elif opcode == opcodes.op_str:
+                self.op_str_impl()
+            elif opcode == opcodes.op_trap:
+                self.op_trap_impl()
+            elif opcode == opcodes.op_res:
+                self.op_res_impl()
+            elif opcode == opcodes.op_rti:
+                self.op_rti_impl()
+            else:
+                raise Error("invalid opcode")
+
             running = running + 1
 
 
@@ -70,7 +140,7 @@ class registers():
         self.cond = (c_uint16)()
 
 # not actually a class but an enum.
-class opcodes(Enum):
+class opcodes(IntEnum):
     op_br = 0
     op_add = 1
     op_ld = 2
@@ -88,7 +158,7 @@ class opcodes(Enum):
     op_lea = 14
     op_trap = 15
 
-class condition_flags(Enum):
+class condition_flags(IntEnum):
     p = 0
     z = 1
     n = 2
