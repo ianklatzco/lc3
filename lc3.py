@@ -151,11 +151,26 @@ class lc3():
         self.update_flags(dr)
 
     def op_st_impl(self, instruction):
-        raise Error("unimplemented opcode")
+        dr = (instruction >> 9) & 0b111
+        pc_offset_9 = instruction & 0x1ff
+        addr = self.registers.pc.value + sext(pc_offset_9, 9)
+
+        self.memory[addr] = self.registers.gprs[dr]
+
     def op_sti_impl(self, instruction):
-        raise Error("unimplemented opcode")
+        dr = (instruction >> 9) & 0b111
+        pc_offset_9 = instruction & 0x1ff
+        addr = self.registers.pc.value + sext(pc_offset_9, 9)
+
+        self.memory[ self.memory[addr] ] = self.registers.gprs[dr]
+
     def op_str_impl(self, instruction):
-        raise Error("unimplemented opcode")
+        dr = (instruction >> 9) & 0b111
+        baser = (instruction >> 6) & 0b111
+        pc_offset_6 = instruction & 0x3f
+
+        addr = self.registers.gprs[baser] + sext(pc_offset_6, 6)
+        self.memory[addr] = self.registers.gprs[dr]
 
     def op_trap_impl(self, instruction):
         # todo: implement more than just halt

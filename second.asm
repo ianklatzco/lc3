@@ -2,7 +2,7 @@
 ; and the patt/patel textbook
 .ORIG x3000
   lea r0, indir
-  ldr r1, r0, #1
+  st r1, #3
   halt
 
 neg:
