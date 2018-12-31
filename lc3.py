@@ -72,7 +72,15 @@ class lc3():
         self.update_flags(dr)
 
     def op_br_impl(self, instruction):
-        raise Error("unimplemented opcode")
+        n = (instruction >> 11) & 1
+        z = (instruction >> 10) & 1
+        p = (instruction >> 9) & 1
+        pc_offset_9 = instruction & 0x1ff
+        if  (n == 1 and self.registers.cond == condition_flags.n) or \
+            (z == 1 and self.registers.cond == condition_flags.z) or \
+            (p == 1 and self.registers.cond == condition_flags.p):
+            self.registers.pc.value = self.registers.pc.value + sext(pc_offset_9, 9)
+
     def op_jmp_impl(self, instruction):
         raise Error("unimplemented opcode")
     def op_jsr_impl(self, instruction):
@@ -117,8 +125,7 @@ class lc3():
         raise Error("unimplemented opcode")
 
     def start(self):
-        running = 1
-        while running < 10:
+        while True:
             # fetch instruction
             instruction = self.memory[self.registers.pc.value]
 
@@ -161,8 +168,6 @@ class lc3():
                 self.op_rti_impl(instruction)
             else:
                 raise Error("invalid opcode")
-
-            running = running + 1
 
 
 '''
