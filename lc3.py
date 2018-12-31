@@ -1,4 +1,4 @@
-from ctypes import c_uint16
+from ctypes import c_uint16, c_int16
 from enum import IntEnum
 from binascii import *
 from struct import unpack
@@ -12,6 +12,11 @@ from sys import exit
 # Perform the instruction using the parameters in the instruction.
 # Go back to step 1.
 
+# https://stackoverflow.com/a/32031543/1234621
+def sext(value, bits):
+    sign_bit = 1 << (bits - 1)
+    return (value & (sign_bit - 1)) - (value & sign_bit)
+
 class lc3():
     def __init__(self, filename):
         self.memory = memory()
@@ -22,9 +27,17 @@ class lc3():
     def read_program_from_file(self,filename):
         with open(filename, 'rb') as f:
             _ = f.read(2) # skip the first two byte which specify where code should be mapped
-            c = f.read()
+            c = f.read()  # todo support arbitrary load locations
         for count in range(0,len(c), 2):
             self.memory[0x3000+count/2] = unpack( '>H', c[count:count+2] )[0]
+
+    def update_flags(self, reg):
+        if self.registers.gprs[reg] == 0:
+            self.registers.cond = condition_flags.z
+        if self.registers.gprs[reg] < 0:
+            self.registers.cond = condition_flags.n
+        if self.registers.gprs[reg] > 0:
+            self.registers.cond = condition_flags.p
 
     def op_add_impl(self, instruction):
         sr1 = (instruction >> 6) & 0b111
@@ -34,7 +47,8 @@ class lc3():
             self.registers.gprs[dr] = self.registers.gprs[sr1] + self.registers.gprs[sr2]
         else: # immediate
             imm5 = instruction & 0b11111 
-            self.registers.gprs[dr] = self.registers.gprs[sr1] + imm5
+            self.registers.gprs[dr] = self.registers.gprs[sr1] + sext(imm5, 5)
+        self.update_flags(dr)
     def op_and_impl(self, instruction):
         raise Error("unimplemented opcode")
     def op_not_impl(self, instruction):
@@ -66,7 +80,8 @@ class lc3():
         print("r4: {:05} ".format(self.registers.gprs[4]), end='')
         print("r5: {:05} ".format(self.registers.gprs[5]), end='')
         print("r6: {:05} ".format(self.registers.gprs[6]), end='')
-        print("r7: {:05}".format(self.registers.gprs[7]))
+        print("r7: {:05} ".format(self.registers.gprs[7]), end='')
+        print("cond: {}".format(condition_flags(self.registers.cond.value).name))
         exit()
     def op_res_impl(self, instruction):
         raise Error("unimplemented opcode")
@@ -146,7 +161,7 @@ class memory():
 
 class registers():
     def __init__(self):
-        self.gprs = (c_uint16 * 8)()
+        self.gprs = (c_int16 * 8)()
         self.pc = (c_uint16)()
         self.cond = (c_uint16)()
 
