@@ -89,7 +89,11 @@ class lc3():
         self.registers.pc.value = self.registers.gprs[baser]
 
     def op_jsr_impl(self, instruction):
-        raise Error("unimplemented opcode")
+        # no jsrr?
+        pc_offset_11 = instruction & 0x7ff
+
+        self.registers.pc.value = self.registers.pc.value + sext(pc_offset_11, 11)
+
     def op_ld_impl(self, instruction):
         raise Error("unimplemented opcode")
     def op_ldr_impl(self, instruction):
