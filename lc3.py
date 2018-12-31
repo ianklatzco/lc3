@@ -127,7 +127,12 @@ class lc3():
         self.update_flags(dr)
 
     def op_ldi_impl(self, instruction):
-        raise Error("unimplemented opcode")
+        dr = (instruction >> 9) & 0b111
+        pc_offset_9 = instruction & 0x1ff
+        addr = self.registers.pc.value + sext(pc_offset_9, 9)
+        self.registers.gprs[dr] = self.memory[ self.memory[addr] ]
+        self.update_flags(dr)
+
     def op_ldr_impl(self, instruction):
         raise Error("unimplemented opcode")
 
