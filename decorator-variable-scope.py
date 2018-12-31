@@ -1,5 +1,5 @@
 import functools
-from inspect import getmembers
+from struct import unpack
 
 # https://stackoverflow.com/a/32031543/1234621
 def sext(value, bits):
@@ -20,6 +20,8 @@ def sext(value, bits):
 # i'd need to mix code & data somehow (or really, just use a class)
 
 # this pains me
+
+instr_lookup_table = ['BR', 'ADD', 'LD', 'ST', 'JSR', 'AND', 'LDR', 'STR', 'RTI', 'NOT', 'LDI', 'STI', 'JMP', 'RES', 'LEA', 'TRAP']
 
 def decorator_de_decorator(func):
     pass
@@ -47,6 +49,7 @@ def extract_all_things(func):
     def wrapper(*args, **kwargs):
         ins = args[0]
         func.opcode = ins >> 12
+        func.imm_bit = (ins >> 5) & 0b1
         sr2 = (ins & 0b111); func.sr2 = sr2
         sr1 = (ins >> 6) & 0b111; func.sr1 = sr1
         dr = (ins >> 9) & 0b111; func.dr = dr
@@ -65,17 +68,43 @@ def extract_all_things(func):
         return func(*args, **kwargs)
     return wrapper
 
+# decorate loads function attributes with all of the possible interpretations.
 @extract_all_things
-def ins(instr, *, self = 3): # asterisk: everything after this is kw only
-    print("opcode: " + hex(self.opcode))
-    print("dr:     " + hex(self.dr))
-    print("sr:     " + hex(self.sr))
-    print("imm5:   " + hex(self.imm5))
-    pass
+def single_ins(instr, *, self = 3): # asterisk: everything after this is kw only
+    opcode = instr_lookup_table[self.opcode]
+    string = ''
 
-# ins.__kwdefaults__ = {'self': ins}
-# print(getmembers(ins))
+    if opcode == 'ADD' or opcode == 'AND':
+        if not self.imm_bit:
+            string = '{opcode} R{dr}, R{sr1}, R{sr2}'.format(opcode=opcode, dr=self.dr, sr1=self.sr1, sr2=self.sr2)
+        else: 
+            string = '{opcode} R{dr}, R{sr1}, #{sr2}'.format(opcode=opcode, dr=self.dr, sr1=self.sr1, sr2=self.sr2)
 
-ins(0x12a3)
+    return string
+
+# returns list of instructions as ints
+def read_file(filename):
+    li = []
+    with open(filename, 'rb') as f:
+        _ = f.read(2) # skip the first two byte which specify where code should be mapped
+        c = f.read()  # todo support arbitrary load locations
+    for count in range(0,len(c), 2):
+        li.append( unpack( '>H', c[count:count+2] )[0] )
+    return li
+
+
+single_ins(0x12a3)
 #  ADD R1, R2, #3
+
+# if len(argv) < 2:
+#     print ("usage: python3 lc3.py code.obj")
+#     exit(255)
+
+# l = read_file(argv[1])
+h = read_file("second.obj")
+
+for inst in h:
+    print( single_ins(inst) )
+
+
 
