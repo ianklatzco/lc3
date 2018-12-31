@@ -134,7 +134,14 @@ class lc3():
         self.update_flags(dr)
 
     def op_ldr_impl(self, instruction):
-        raise Error("unimplemented opcode")
+        dr = (instruction >> 9) & 0b111
+        baser = (instruction >> 6) & 0b111
+        pc_offset_6 = instruction & 0x3f
+
+        addr = self.registers.gprs[baser] + sext(pc_offset_6, 6)
+        self.registers.gprs[dr] = self.memory[addr]
+
+        self.update_flags(dr)
 
     def op_lea_impl(self, instruction):
         dr = (instruction >> 9) & 0b111
@@ -149,10 +156,12 @@ class lc3():
         raise Error("unimplemented opcode")
     def op_str_impl(self, instruction):
         raise Error("unimplemented opcode")
+
     def op_trap_impl(self, instruction):
         # todo: implement more than just halt
         self.dump_state()
         exit()
+
     def op_res_impl(self, instruction):
         raise Error("unimplemented opcode")
     def op_rti_impl(self, instruction):
