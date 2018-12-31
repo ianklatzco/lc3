@@ -1,9 +1,12 @@
 from ctypes import c_uint16
 from enum import Enum
 
+# https://justinmeiners.github.io/lc3-vm/
+
 class lc3():
     def __init__(self):
         self.memory = memory()
+        self.registers = registers()
         pass
 
 '''
@@ -27,19 +30,20 @@ class memory():
 
         self.memory[location] = thing_to_write
 
-# not actually a class but an enum.
-class registers(Enum):
-    r0 = (c_uint16)()
-    r1 = (c_uint16)()
-    r2 = (c_uint16)()
-    r3 = (c_uint16)()
-    r4 = (c_uint16)()
-    r5 = (c_uint16)()
-    r6 = (c_uint16)()
-    r7 = (c_uint16)()
-    pc = (c_uint16)()
-    cond = (c_uint16)()
+class registers():
+    def __init__():
+        self.r0 = (c_uint16)()
+        self.r1 = (c_uint16)()
+        self.r2 = (c_uint16)()
+        self.r3 = (c_uint16)()
+        self.r4 = (c_uint16)()
+        self.r5 = (c_uint16)()
+        self.r6 = (c_uint16)()
+        self.r7 = (c_uint16)()
+        self.pc = (c_uint16)()
+        self.cond = (c_uint16)()
 
+# not actually a class but an enum.
 class opcodes(Enum):
     op_br = 0
     op_add = 1
@@ -63,6 +67,12 @@ class condition_flags(Enum):
     z = 1
     n = 2
 
+
+# Load one instruction from memory at the address of the PC register.
+# Increment the PC register.
+# Look at the opcode to determine which type of instruction it should perform.
+# Perform the instruction using the parameters in the instruction.
+# Go back to step 1.
 
 
 m = memory()
