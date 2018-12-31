@@ -53,16 +53,24 @@ class lc3():
     def op_and_impl(self, instruction):
         sr1 = (instruction >> 6) & 0b111
         dr  = (instruction >> 9) & 0b111
+
         if ((instruction >> 5) & 0b1) == 0: # reg-reg
             sr2 = instruction & 0b111
             self.registers.gprs[dr] = self.registers.gprs[sr1] & self.registers.gprs[sr2]
         else: # immediate
             imm5 = instruction & 0b11111 
             self.registers.gprs[dr] = self.registers.gprs[sr1] & sext(imm5, 5)
+
         self.update_flags(dr)
-        
+
     def op_not_impl(self, instruction):
-        raise Error("unimplemented opcode")
+        sr  = (instruction >> 6) & 0b111
+        dr  = (instruction >> 9) & 0b111
+
+        self.registers.gprs[dr] = ~ (self.registers.gprs[sr])
+
+        self.update_flags(dr)
+
     def op_br_impl(self, instruction):
         raise Error("unimplemented opcode")
     def op_jmp_impl(self, instruction):
