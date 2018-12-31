@@ -2,12 +2,18 @@
 ; and the patt/patel textbook
 .ORIG x3000
   lea r0, neg
-  jmp r0
+  jsr neg
   HALT
+  and r0, r0, #0
+  and r0, r0, #0
+  and r0, r0, #0
+  and r0, r0, #0
+  and r0, r0, #0
+  and r0, r0, #0
 
-NEG:
+neg:
   add r1, r1, #-1
-  HALT              ; Trap x25
+  ret
 
 STRING  .stringz  "1234\n"
 .END

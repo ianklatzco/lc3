@@ -39,6 +39,28 @@ class lc3():
         if self.registers.gprs[reg] > 0:
             self.registers.cond = condition_flags.p
 
+    def dump_state(self):
+        print("pc: {:04x}".format(self.registers.pc.value))
+        print("r0: {:05} ".format(self.registers.gprs[0]), end='')
+        print("r1: {:05} ".format(self.registers.gprs[1]), end='')
+        print("r2: {:05} ".format(self.registers.gprs[2]), end='')
+        print("r3: {:05} ".format(self.registers.gprs[3]), end='')
+        print("r4: {:05} ".format(self.registers.gprs[4]), end='')
+        print("r5: {:05} ".format(self.registers.gprs[5]), end='')
+        print("r6: {:05} ".format(self.registers.gprs[6]), end='')
+        print("r7: {:05} ".format(self.registers.gprs[7]))
+
+        print("r0:  {:04x} ".format(c_uint16(self.registers.gprs[0]).value), end='')
+        print("r1:  {:04x} ".format(c_uint16(self.registers.gprs[1]).value), end='')
+        print("r2:  {:04x} ".format(c_uint16(self.registers.gprs[2]).value), end='')
+        print("r3:  {:04x} ".format(c_uint16(self.registers.gprs[3]).value), end='')
+        print("r4:  {:04x} ".format(c_uint16(self.registers.gprs[4]).value), end='')
+        print("r5:  {:04x} ".format(c_uint16(self.registers.gprs[5]).value), end='')
+        print("r6:  {:04x} ".format(c_uint16(self.registers.gprs[6]).value), end='')
+        print("r7:  {:04x} ".format(c_uint16(self.registers.gprs[7]).value))
+
+        print("cond: {}".format(condition_flags(self.registers.cond.value).name))
+
     def op_add_impl(self, instruction):
         sr1 = (instruction >> 6) & 0b111
         dr  = (instruction >> 9) & 0b111
@@ -92,6 +114,7 @@ class lc3():
         # no jsrr?
         pc_offset_11 = instruction & 0x7ff
 
+        self.registers.gprs[7] = self.registers.pc
         self.registers.pc.value = self.registers.pc.value + sext(pc_offset_11, 11)
 
     def op_ld_impl(self, instruction):
@@ -103,7 +126,7 @@ class lc3():
         dr = (instruction >> 9) & 0b111
         pc_offset_9 = instruction & 0x1ff
 
-        self.registers.pc.value = self.registers.pc.value + sext(pc_offset_9, 9)
+        self.registers.gprs[dr] = self.registers.pc.value + sext(pc_offset_9, 9)
         self.update_flags(dr)
 
     def op_st_impl(self, instruction):
@@ -114,25 +137,7 @@ class lc3():
         raise Error("unimplemented opcode")
     def op_trap_impl(self, instruction):
         # todo: implement more than just halt
-        print("r0: {:05} ".format(self.registers.gprs[0]), end='')
-        print("r1: {:05} ".format(self.registers.gprs[1]), end='')
-        print("r2: {:05} ".format(self.registers.gprs[2]), end='')
-        print("r3: {:05} ".format(self.registers.gprs[3]), end='')
-        print("r4: {:05} ".format(self.registers.gprs[4]), end='')
-        print("r5: {:05} ".format(self.registers.gprs[5]), end='')
-        print("r6: {:05} ".format(self.registers.gprs[6]), end='')
-        print("r7: {:05} ".format(self.registers.gprs[7]))
-
-        print("r0: {:5} ".format(hex(c_uint16(self.registers.gprs[0]).value)[2:]), end='')
-        print("r1: {:5} ".format(hex(c_uint16(self.registers.gprs[1]).value)[2:]), end='')
-        print("r2: {:5} ".format(hex(c_uint16(self.registers.gprs[2]).value)[2:]), end='')
-        print("r3: {:5} ".format(hex(c_uint16(self.registers.gprs[3]).value)[2:]), end='')
-        print("r4: {:5} ".format(hex(c_uint16(self.registers.gprs[4]).value)[2:]), end='')
-        print("r5: {:5} ".format(hex(c_uint16(self.registers.gprs[5]).value)[2:]), end='')
-        print("r6: {:5} ".format(hex(c_uint16(self.registers.gprs[6]).value)[2:]), end='')
-        print("r7: {:5} ".format(hex(c_uint16(self.registers.gprs[7]).value)[2:]))
-
-        print("cond: {}".format(condition_flags(self.registers.cond.value).name))
+        self.dump_state()
         exit()
     def op_res_impl(self, instruction):
         raise Error("unimplemented opcode")
@@ -149,6 +154,11 @@ class lc3():
 
             # decode opcode
             opcode = instruction >> 12
+
+            # if debug = true
+            print(opcodes(opcode))
+            self.dump_state()
+            input()
 
             # decoding of the instruction should happen here
             if opcode == opcodes.op_add:
