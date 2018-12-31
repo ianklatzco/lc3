@@ -2,7 +2,7 @@ from ctypes import c_uint16, c_int16
 from enum import IntEnum
 from binascii import *
 from struct import unpack
-from sys import exit
+from sys import exit, stdin, stdout
 
 # https://justinmeiners.github.io/lc3-vm/
 
@@ -12,7 +12,7 @@ from sys import exit
 # Perform the instruction using the parameters in the instruction.
 # Go back to step 1.
 
-DEBUG = False
+DEBUG = True
 
 # https://stackoverflow.com/a/32031543/1234621
 def sext(value, bits):
@@ -173,9 +173,26 @@ class lc3():
         self.memory[addr] = self.registers.gprs[dr]
 
     def op_trap_impl(self, instruction):
-        # todo: implement more than just halt
-        self.dump_state()
-        exit()
+        trap_vector = instruction & 0xff
+
+        # self.registers.gprs[7] = self.registers.pc.value
+        # self.registers.pc.value= self.memory[trap_vector]
+
+        if trap_vector == 0x20: # getc
+            c = stdin.buffer.read(1)[0]
+            self.registers.gprs[0] = ord(c)
+            return
+
+        if trap_vector == 0x21: # out
+            stdout.buffer.write( bytes( [(self.registers.gprs[0] & 0xff)] ) )
+            stdout.buffer.flush()
+            return
+
+        if trap_vector == 0x25:
+            self.dump_state()
+            exit()
+
+        raise Error("undefined trap vector {}".format(hex(trap_vector)))
 
     def op_res_impl(self, instruction):
         raise Error("unimplemented opcode")
@@ -196,6 +213,7 @@ class lc3():
             # if debug = true
             if DEBUG:
                 print(opcodes(opcode))
+                print(hex(instruction))
                 self.dump_state()
                 input()
 
