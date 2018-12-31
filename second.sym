@@ -2,8 +2,20 @@
 // Scope level 0:
 //	Symbol Name       Page Address
 //	----------------  ------------
-//	STRING            3004
-//	INDIR             300A
-//	AOEU              300B
-//	h                 300C
+//	START             3000
+//	MYGETS            3005
+//	MYGETSNEXT        3008
+//	MYGETSPASS1       3013
+//	MYGETSDONE        3016
+//	MYGETSRET         3018
+//	NEGNL             3019
+//	NEGDOT            301A
+//	NL                301B
+//	DOT               301C
+//	MYPUTS            301D
+//	MYPUTSNEXT        301F
+//	MYPUTSDONE        3024
+//	MYPUTSRET         3026
+//	MYSTRING          3027
+//	MYSTORAGE         3076
 

@@ -1,13 +1,56 @@
-; with thanks to https://stackoverflow.com/a/33401821/1234621
-; and the patt/patel textbook
 .ORIG x3000
-  add r1, r1, #-1
-  ld  r0, h
-  out
-  halt
 
-STRING  .stringz  "1234\n"
-INDIR   .fill AOEU
-AOEU    .fill xfcef
-h       .fill x68
+START:
+  LEA R0, MYSTRING
+  JSR MYPUTS
+  LEA R0, MYSTORAGE
+  JSR MYGETS
+  HALT
+
+MYGETS:
+  ADD R1, R0, #0
+  AND R2, R2, #0
+  ST R7, MYGETSRET
+MYGETSNEXT:
+  GETC
+  STR R0, R1, #0
+  ADD R1, R1, #1
+  ADD R2, R2, #1
+  ADD R3, R2, #-3
+  BRN MYGETSNEXT
+  LDR R0, R1, #-3
+  LD R3, NEGNL
+  ADD R3, R3, R0
+  BRZ MYGETSPASS1
+  BR MYGETSNEXT
+MYGETSPASS1:
+  LD R0, DOT
+  OUT
+  BR MYGETSNEXT
+MYGETSDONE:
+  LD R7, MYGETSRET
+  RET
+MYGETSRET .FILL x0
+NEGNL .FILL xF0
+NEGDOT .FILL xD2
+NL .FILL x10
+DOT .FILL x2E
+
+MYPUTS:
+  ADD R1, R0, #0
+  ST R7, MYPUTSRET
+MYPUTSNEXT:
+  LDR R0, R1, #0
+  BRZ MYPUTSDONE
+  OUT
+  ADD R1, R1, #1
+  BR MYPUTSNEXT
+MYPUTSDONE:
+  LD R7, MYPUTSRET
+  RET
+MYPUTSRET .FILL x0
+
+MYSTRING .STRINGZ "Please enter your message followed by\na line containing only a single period.\n"
+MYSTORAGE:
+
 .END
