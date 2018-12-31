@@ -81,8 +81,13 @@ class lc3():
             (p == 1 and self.registers.cond == condition_flags.p):
             self.registers.pc.value = self.registers.pc.value + sext(pc_offset_9, 9)
 
+    # also ret
     def op_jmp_impl(self, instruction):
-        raise Error("unimplemented opcode")
+        baser = (instruction >> 6) & 0b111
+
+        self.registers.pc.value = self.registers.gprs[baser]
+
+
     def op_jsr_impl(self, instruction):
         raise Error("unimplemented opcode")
     def op_ld_impl(self, instruction):
