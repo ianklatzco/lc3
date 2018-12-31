@@ -1,6 +1,5 @@
 from ctypes import c_uint16, c_int16
 from enum import IntEnum
-from binascii import *
 from struct import unpack
 from sys import exit, stdin, stdout
 
@@ -12,7 +11,14 @@ from sys import exit, stdin, stdout
 # Perform the instruction using the parameters in the instruction.
 # Go back to step 1.
 
-DEBUG = True
+# there was a lot of copy-pasting lines of code for things like
+# pulling pcoffset9 out of an instruction.
+# https://justinmeiners.github.io/lc3-vm/#1:14
+# ^ talks about a nice compact way to encode instructions using bitfields and
+# c++'s templates.
+# i am curious if you could do it with python decorators.
+
+DEBUG = False
 
 # https://stackoverflow.com/a/32031543/1234621
 def sext(value, bits):
@@ -114,6 +120,7 @@ class lc3():
 
     def op_jsr_impl(self, instruction):
         # no jsrr?
+        if 0x0400 & instruction == 1: raise Error("JSRR is not implemented.")
         pc_offset_11 = instruction & 0x7ff
 
         self.registers.gprs[7] = self.registers.pc.value
@@ -180,7 +187,7 @@ class lc3():
 
         if trap_vector == 0x20: # getc
             c = stdin.buffer.read(1)[0]
-            self.registers.gprs[0] = ord(c)
+            self.registers.gprs[0] = c
             return
 
         if trap_vector == 0x21: # out
@@ -210,14 +217,12 @@ class lc3():
             # decode opcode
             opcode = instruction >> 12
 
-            # if debug = true
             if DEBUG:
                 print(opcodes(opcode))
                 print(hex(instruction))
                 self.dump_state()
                 input()
 
-            # decoding of the instruction should happen here
             if opcode == opcodes.op_add:
                 self.op_add_impl(instruction)
             elif opcode == opcodes.op_and:
@@ -281,7 +286,6 @@ class registers():
         self.gprs = (c_int16 * 8)()
         self.pc = (c_uint16)()
         self.cond = (c_uint16)()
-
 
 # not actually a class but an enum.
 class opcodes(IntEnum):
