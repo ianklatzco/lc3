@@ -12,6 +12,8 @@ from sys import exit
 # Perform the instruction using the parameters in the instruction.
 # Go back to step 1.
 
+DEBUG = False
+
 # https://stackoverflow.com/a/32031543/1234621
 def sext(value, bits):
     sign_bit = 1 << (bits - 1)
@@ -114,10 +116,12 @@ class lc3():
         # no jsrr?
         pc_offset_11 = instruction & 0x7ff
 
-        self.registers.gprs[7] = self.registers.pc
+        self.registers.gprs[7] = self.registers.pc.value
         self.registers.pc.value = self.registers.pc.value + sext(pc_offset_11, 11)
 
     def op_ld_impl(self, instruction):
+        raise Error("unimplemented opcode")
+    def op_ldi_impl(self, instruction):
         raise Error("unimplemented opcode")
     def op_ldr_impl(self, instruction):
         raise Error("unimplemented opcode")
@@ -156,9 +160,10 @@ class lc3():
             opcode = instruction >> 12
 
             # if debug = true
-            print(opcodes(opcode))
-            self.dump_state()
-            input()
+            if DEBUG:
+                print(opcodes(opcode))
+                self.dump_state()
+                input()
 
             # decoding of the instruction should happen here
             if opcode == opcodes.op_add:
@@ -175,6 +180,8 @@ class lc3():
                 self.op_jsr_impl(instruction)
             elif opcode == opcodes.op_ld:
                 self.op_ld_impl(instruction)
+            elif opcode == opcodes.op_ldi:
+                self.op_ldi_impl(instruction)
             elif opcode == opcodes.op_ldr:
                 self.op_ldr_impl(instruction)
             elif opcode == opcodes.op_lea:
