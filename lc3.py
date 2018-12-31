@@ -109,7 +109,7 @@ class lc3():
             self.registers.cond = condition_flags.p
 
     def dump_state(self):
-        print("pc: {:04x}".format(self.registers.pc.value))
+        print("\npc: {:04x}".format(self.registers.pc.value))
         print("r0: {:05} ".format(self.registers.gprs[0]), end='')
         print("r1: {:05} ".format(self.registers.gprs[1]), end='')
         print("r2: {:05} ".format(self.registers.gprs[2]), end='')
@@ -256,11 +256,22 @@ class lc3():
             stdout.buffer.flush()
             return
 
+        if trap_vector == 0x22: # puts
+            base_addr = self.registers.gprs[0]
+            index = 0
+
+            while (self.memory[base_addr + index]) != 0x00:
+                nextchar = self.memory[base_addr + index]
+                stdout.buffer.write( bytes( [nextchar] ) )
+                index = index + 1
+
+            return
+
         if trap_vector == 0x25:
             self.dump_state()
             exit()
 
-        raise Error("undefined trap vector {}".format(hex(trap_vector)))
+        raise ValueError("undefined trap vector {}".format(hex(trap_vector)))
 
     def op_res_impl(self, instruction):
         raise Error("unimplemented opcode")
