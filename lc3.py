@@ -21,6 +21,12 @@ from signal import signal, SIGINT
 
 DEBUG = False
 
+def signal_handler(signal, frame):
+    print("\nbye!")
+    exit()
+
+signal(SIGINT, signal_handler)
+
 # https://stackoverflow.com/a/32031543/1234621
 # you're modeling sign-extend behavior in python, since python has infinite
 # bit width.
