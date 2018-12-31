@@ -76,6 +76,7 @@ class lc3():
         z = (instruction >> 10) & 1
         p = (instruction >> 9) & 1
         pc_offset_9 = instruction & 0x1ff
+
         if  (n == 1 and self.registers.cond == condition_flags.n) or \
             (z == 1 and self.registers.cond == condition_flags.z) or \
             (p == 1 and self.registers.cond == condition_flags.p):
@@ -87,15 +88,20 @@ class lc3():
 
         self.registers.pc.value = self.registers.gprs[baser]
 
-
     def op_jsr_impl(self, instruction):
         raise Error("unimplemented opcode")
     def op_ld_impl(self, instruction):
         raise Error("unimplemented opcode")
     def op_ldr_impl(self, instruction):
         raise Error("unimplemented opcode")
+
     def op_lea_impl(self, instruction):
-        raise Error("unimplemented opcode")
+        dr = (instruction >> 9) & 0b111
+        pc_offset_9 = instruction & 0x1ff
+
+        self.registers.pc.value = self.registers.pc.value + sext(pc_offset_9, 9)
+        self.update_flags(dr)
+
     def op_st_impl(self, instruction):
         raise Error("unimplemented opcode")
     def op_sti_impl(self, instruction):

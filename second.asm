@@ -1,9 +1,8 @@
 ; with thanks to https://stackoverflow.com/a/33401821/1234621
 ; and the patt/patel textbook
 .ORIG x3000
-  add r0, r0, #0
-
-  BRn NEG
+  lea r0, neg
+  jmp r0
   HALT
 
 NEG:
