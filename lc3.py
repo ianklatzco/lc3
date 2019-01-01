@@ -1,14 +1,5 @@
 # usage: python3 lc3.py ./second.obj
 
-from ctypes import c_uint16, c_int16
-from enum import IntEnum
-from struct import unpack
-from sys import exit, stdin, stdout, argv
-from signal import signal, SIGINT
-
-class UnimpError(Exception):
-    pass
-
 # https://justinmeiners.github.io/lc3-vm/
 
 # Load one instruction from memory at the address of the PC register.
@@ -24,7 +15,20 @@ class UnimpError(Exception):
 # c++'s templates.
 # i am curious if you could do it with python decorators.
 
+# i tried this and it was mostly just an excuse to learn decorators, but it
+# isn't the right tool.
+
+from ctypes import c_uint16, c_int16
+from enum import IntEnum
+from struct import unpack
+from sys import exit, stdin, stdout, argv
+from signal import signal, SIGINT
+import lc3disas # in same dir
+
 DEBUG = False
+
+class UnimpError(Exception):
+    pass
 
 def signal_handler(signal, frame):
     print("\nbye!")
@@ -248,9 +252,6 @@ class lc3():
     def op_trap_impl(self, instruction):
         trap_vector = instruction & 0xff
 
-        # self.registers.gprs[7] = self.registers.pc.value
-        # self.registers.pc.value= self.memory[trap_vector]
-
         if trap_vector == 0x20: # getc
             c = stdin.buffer.read(1)[0]
             self.registers.gprs[0] = c
@@ -295,45 +296,35 @@ class lc3():
             opcode = instruction >> 12
 
             if DEBUG:
-                print(opcodes(opcode))
-                print(hex(instruction))
+                print("instruction: {}".format(hex(instruction)))
+                print("disassembly: {}".format(lc3disas.single_ins(self.registers.pc.value, instruction)))
                 self.dump_state()
                 input()
 
-            if opcode == opcodes.op_add:
-                self.op_add_impl(instruction)
-            elif opcode == opcodes.op_and:
-                self.op_and_impl(instruction)
-            elif opcode == opcodes.op_not:
-                self.op_not_impl(instruction)
-            elif opcode == opcodes.op_br:
-                self.op_br_impl(instruction)
-            elif opcode == opcodes.op_jmp:
-                self.op_jmp_impl(instruction)
-            elif opcode == opcodes.op_jsr:
-                self.op_jsr_impl(instruction)
-            elif opcode == opcodes.op_ld:
-                self.op_ld_impl(instruction)
-            elif opcode == opcodes.op_ldi:
-                self.op_ldi_impl(instruction)
-            elif opcode == opcodes.op_ldr:
-                self.op_ldr_impl(instruction)
-            elif opcode == opcodes.op_lea:
-                self.op_lea_impl(instruction)
-            elif opcode == opcodes.op_st:
-                self.op_st_impl(instruction)
-            elif opcode == opcodes.op_sti:
-                self.op_sti_impl(instruction)
-            elif opcode == opcodes.op_str:
-                self.op_str_impl(instruction)
-            elif opcode == opcodes.op_trap:
-                self.op_trap_impl(instruction)
-            elif opcode == opcodes.op_res:
-                self.op_res_impl(instruction)
-            elif opcode == opcodes.op_rti:
-                self.op_rti_impl(instruction)
-            else:
-                raise Error("invalid opcode")
+            opcode_dict = \
+            {
+                opcodes.op_add: self.op_add_impl,
+                opcodes.op_and: self.op_and_impl,
+                opcodes.op_not: self.op_not_impl,
+                opcodes.op_br:  self.op_br_impl,
+                opcodes.op_jmp: self.op_jmp_impl,
+                opcodes.op_jsr: self.op_jsr_impl,
+                opcodes.op_ld:  self.op_ld_impl,
+                opcodes.op_ldi: self.op_ldi_impl,
+                opcodes.op_ldr: self.op_ldr_impl,
+                opcodes.op_lea: self.op_lea_impl,
+                opcodes.op_st:  self.op_st_impl,
+                opcodes.op_sti: self.op_sti_impl,
+                opcodes.op_str: self.op_str_impl,
+                opcodes.op_trap:self.op_trap_impl,
+                opcodes.op_res: self.op_res_impl,
+                opcodes.op_rti: self.op_rti_impl
+            }
+
+            try:
+                opcode_dict[opcode](instruction)
+            except KeyError:
+                raise UnimpError("invalid opcode")
 
 ##############################################################################
 

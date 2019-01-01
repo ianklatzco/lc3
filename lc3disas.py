@@ -1,6 +1,9 @@
 # print ("usage: python3 lc3.py code.obj")
 # one warning: lc3 doesn't have section labels, so there's no way to distinguish code and data.
 
+# here there be dragons (this is "learning" code and not "high-quality" code so
+# it has silly patterns)
+
 import functools
 from struct import unpack
 from sys import argv, exit
@@ -72,7 +75,7 @@ def single_ins(pc, instr, *, self = 3): # asterisk: everything after this is kw 
             return '{opcode} R{dr}, R{sr1}, #{sr2}'.format(opcode=opcode, dr=self.dr, sr1=self.sr1, sr2=self.sr2)
 
     if opcode == 'BR':
-        return '{opcode}{n}{z}{p} {label}'.format(opcode=opcode, n=self.n, z=self.z, p=self.p, label=pc+self.pc_offset_9)
+        return '{opcode}{n}{z}{p} {addr:x}'.format(opcode=opcode, n=self.n, z=self.z, p=self.p, addr=pc+self.pc_offset_9)
 
     if opcode == 'JMP':
         if self.baser == 7: # ret
@@ -82,27 +85,27 @@ def single_ins(pc, instr, *, self = 3): # asterisk: everything after this is kw 
 
     if opcode == 'JSR':
         if self.jsr_bit:
-            return 'JSR {addr}'.format(addr=pc+self.pc_offset_11)
+            return 'JSR {addr:x}'.format(addr=pc+self.pc_offset_11)
         else:
             return 'JSRR R{reg}'.format(reg=self.baser)
 
     if opcode == 'LD':
-        return 'LD R{reg}, {addr}'.format(reg=self.dr, addr=pc+self.pc_offset_9)
+        return 'LD R{reg}, {addr:x}'.format(reg=self.dr, addr=pc+self.pc_offset_9)
 
     if opcode == 'LDI':
-        return 'LDI R{reg}, {addr}'.format(reg=self.dr, addr=self.pc_offset_9)
+        return 'LDI R{reg}, {addr:x}'.format(reg=self.dr, addr=self.pc_offset_9)
 
     if opcode == 'LDR':
         return 'LDR R{dr}, R{baser}, #{offset}'.format(dr=self.dr, baser=self.baser, offset=self.pc_offset_6)
 
     if opcode == 'LEA':
-        return 'LEA R{dr}, {addr}'.format(dr=self.dr, addr=pc+self.pc_offset_9)
+        return 'LEA R{dr}, {addr:x}'.format(dr=self.dr, addr=pc+self.pc_offset_9)
 
     if opcode == 'NOT':
         return 'NOT R{dr}, R{sr}'.format(dr=self.dr, sr=self.sr)
 
     if opcode == 'ST' or opcode == 'STI':
-        return '{opcode} R{sr}, {addr}'.format(opcode=opcode, sr=self.sr, addr=pc+self.pc_offset_9)
+        return '{opcode} R{sr}, {addr:x}'.format(opcode=opcode, sr=self.sr, addr=pc+self.pc_offset_9)
 
     if opcode == 'STR':
         return 'STR R{sr}, R{baser}, #{offset}'.format(sr=self.sr, baser=self.baser, offset=self.pc_offset_6)
@@ -129,18 +132,14 @@ def read_file(filename):
     return li
 
 
-#  ADD R1, R2, #3
+if __name__ == 'main':
+    if len(argv) < 2:
+        print ("usage: python3 lc3.py code.obj")
+        exit(255)
 
-if len(argv) < 2:
-    print ("usage: python3 lc3.py code.obj")
-    exit(255)
+    h = read_file(argv[1])
+    # h = read_file("second.obj")
 
-h = read_file(argv[1])
-# h = read_file("second.obj")
-
-for index,inst in enumerate(h):
-    pc = index + 1 + 3000
-    print( single_ins(pc, inst) )
-
-
-
+    for index,inst in enumerate(h):
+        pc = index + 1 + 3000
+        print( single_ins(pc, inst) )
