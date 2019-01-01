@@ -1,10 +1,15 @@
 import functools
 from struct import unpack
 
+# for now this supports programs loaded starting @ 0x3000 only
+
 # https://stackoverflow.com/a/32031543/1234621
 def sext(value, bits):
     sign_bit = 1 << (bits - 1)
     return (value & (sign_bit - 1)) - (value & sign_bit)
+
+class UnimpError(Exception):
+    pass
 
 # the ~~~correct~~~ way to store information for an "instruction" is probably
 # a class.
@@ -26,38 +31,21 @@ instr_lookup_table = ['BR', 'ADD', 'LD', 'ST', 'JSR', 'AND', 'LDR', 'STR', 'RTI'
 def decorator_de_decorator(func):
     pass
 
-def extract_opcode(func):
-    @functools.wraps(func) # preserve docstring, name of orig function
-    def wrapper(*args, **kwargs):
-        opcode = args[0] >> 12
-        func.opcode = opcode
-        func.__kwdefaults__ = {'self': func}
-        return func(*args, **kwargs)
-    return wrapper
-
-def extract_dr(func):
-    @functools.wraps(func) # preserve docstring, name of orig function
-    def wrapper(*args, **kwargs):
-        dr = (args[0] >> 9) & 0b111
-        func.dr = dr
-        func.__kwdefaults__ = {'self': func}
-        return func(*args, **kwargs)
-    return wrapper
-
 def extract_all_things(func):
     @functools.wraps(func) # preserve docstring, name of orig function
     def wrapper(*args, **kwargs):
-        ins = args[0]
+        ins = args[1] # this is disgusting
         func.opcode = ins >> 12
         func.imm_bit = (ins >> 5) & 0b1
+        func.jsr_bit = (ins >>11) & 0b1
         sr2 = (ins & 0b111); func.sr2 = sr2
         sr1 = (ins >> 6) & 0b111; func.sr1 = sr1
         dr = (ins >> 9) & 0b111; func.dr = dr
         imm5 = (ins & 0b11111); func.imm5 = imm5
         pc_offset_9 = sext(ins & 0x1ff, 16); func.pc_offset_9 = pc_offset_9
-        n = (ins >> 11) & 0b1
-        z = (ins >> 10) & 0b1
-        p = (ins >> 9) & 0b1
+        func.n = 'n' if ( (ins >> 11) & 0b1 ) else ''
+        func.z = 'z' if (ins >> 10) & 0b1 else ''
+        func.p = 'p' if (ins >> 9) & 0b1 else ''
         pc_offset_11 = sext(ins & 0x7ff, 16); func.pc_offset_11 = pc_offset_11
         pc_offset_6 = sext(ins & 0x3f, 16); func.pc_offset_6 = pc_offset_6
         func.baser = sr1
@@ -70,17 +58,34 @@ def extract_all_things(func):
 
 # decorate loads function attributes with all of the possible interpretations.
 @extract_all_things
-def single_ins(instr, *, self = 3): # asterisk: everything after this is kw only
+def single_ins(pc, instr, *, self = 3): # asterisk: everything after this is kw only
     opcode = instr_lookup_table[self.opcode]
-    string = ''
 
     if opcode == 'ADD' or opcode == 'AND':
         if not self.imm_bit:
-            string = '{opcode} R{dr}, R{sr1}, R{sr2}'.format(opcode=opcode, dr=self.dr, sr1=self.sr1, sr2=self.sr2)
+            return '{opcode} R{dr}, R{sr1}, R{sr2}'.format(opcode=opcode, dr=self.dr, sr1=self.sr1, sr2=self.sr2)
         else: 
-            string = '{opcode} R{dr}, R{sr1}, #{sr2}'.format(opcode=opcode, dr=self.dr, sr1=self.sr1, sr2=self.sr2)
+            return '{opcode} R{dr}, R{sr1}, #{sr2}'.format(opcode=opcode, dr=self.dr, sr1=self.sr1, sr2=self.sr2)
 
-    return string
+    if opcode == 'BR':
+        return '{opcode}{n}{z}{p} {label}'.format(opcode=opcode, n=self.n, z=self.z, p=self.p, label=pc+self.pc_offset_9)
+
+    if opcode == 'JMP':
+        if self.baser == 7: # ret
+            return 'RET'
+        else: # jmp
+            return 'JMP R{reg}'.format(reg=self.baser)
+
+    if opcode == 'JSR':
+        if self.jsr_bit:
+            return 'JSR {addr}'.format(addr=pc+self.pc_offset_11)
+        else:
+            return 'JSRR R{reg}'.format(reg=self.baser)
+            pass
+
+    return 'not yet implemented'
+    # raise UnimpError("Unimplemented")
+
 
 # returns list of instructions as ints
 def read_file(filename):
@@ -93,7 +98,6 @@ def read_file(filename):
     return li
 
 
-single_ins(0x12a3)
 #  ADD R1, R2, #3
 
 # if len(argv) < 2:
@@ -103,8 +107,9 @@ single_ins(0x12a3)
 # l = read_file(argv[1])
 h = read_file("second.obj")
 
-for inst in h:
-    print( single_ins(inst) )
+for index,inst in enumerate(h):
+    pc = index + 1 + 3000
+    print( single_ins(pc, inst) )
 
 
 
