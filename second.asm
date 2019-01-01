@@ -10,14 +10,18 @@
   jsr asdf
   jsrr r3
   ld r6, foo
-
-  LEA r0, MYSTRING
+  ldi r6, foo
+  ldr r4, r2, #-5
+  LEA r0, foo
+  NOT r1, r2
+  ST R4, asdf
+  sti r4, asdf
+  str r4, r2, #5
   PUTS
 asdf:
   HALT
 
 FOO    .FILL x69
 
-MYSTRING .STRINGZ "Hello!\n"
 
 .END
