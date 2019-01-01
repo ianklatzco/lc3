@@ -1,22 +1,16 @@
 # usage: python3 lc3.py ./second.obj
 
-# https://justinmeiners.github.io/lc3-vm/
+# This project inspired by https://justinmeiners.github.io/lc3-vm/
 
-# Load one instruction from memory at the address of the PC register.
-# Increment the PC register.
-# Look at the opcode to determine which type of instruction it should perform.
-# Perform the instruction using the parameters in the instruction.
-# Go back to step 1.
-
-# there was a lot of copy-pasting lines of code for things like
+# There was a lot of copy-pasting lines of code for things like
 # pulling pcoffset9 out of an instruction.
 # https://justinmeiners.github.io/lc3-vm/#1:14
 # ^ talks about a nice compact way to encode instructions using bitfields and
 # c++'s templates.
 # i am curious if you could do it with python decorators.
 
-# i tried this and it was mostly just an excuse to learn decorators, but it
-# isn't the right tool.
+# update: i tried this and it was mostly just an excuse to learn decorators, but it
+# isn't the right tool. i am curious how else you might do it.
 
 from ctypes import c_uint16, c_int16
 from enum import IntEnum
