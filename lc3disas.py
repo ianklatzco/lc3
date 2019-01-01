@@ -1,3 +1,6 @@
+# print ("usage: python3 lc3.py code.obj")
+# one warning: lc3 doesn't have section labels, so there's no way to distinguish code and data.
+
 import functools
 from struct import unpack
 from sys import argv, exit
