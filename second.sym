@@ -2,7 +2,7 @@
 // Scope level 0:
 //	Symbol Name       Page Address
 //	----------------  ------------
-//	asdf              300B
-//	FOO               300C
-//	MYSTRING          300D
+//	asdf              300C
+//	FOO               300D
+//	MYSTRING          300E
 

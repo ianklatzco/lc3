@@ -81,7 +81,9 @@ def single_ins(pc, instr, *, self = 3): # asterisk: everything after this is kw 
             return 'JSR {addr}'.format(addr=pc+self.pc_offset_11)
         else:
             return 'JSRR R{reg}'.format(reg=self.baser)
-            pass
+
+    if opcode == 'LD':
+        return 'LD R{reg}, {addr}'.format(reg=self.dr, addr=pc+self.pc_offset_9)
 
     return 'not yet implemented'
     # raise UnimpError("Unimplemented")

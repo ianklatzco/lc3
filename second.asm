@@ -9,13 +9,14 @@
   RET
   jsr asdf
   jsrr r3
+  ld r6, foo
 
   LEA r0, MYSTRING
   PUTS
 asdf:
   HALT
 
-FOO    .FILL x0
+FOO    .FILL x69
 
 MYSTRING .STRINGZ "Hello!\n"
 
