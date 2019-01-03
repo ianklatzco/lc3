@@ -184,7 +184,7 @@ class lc3():
 
     def op_jsr_impl(self, instruction):
         # no jsrr?
-        if 0x0400 & instruction == 1: raise UnimpError("JSRR is not implemented.")
+        if (0x0800 & instruction) == 0x0800: raise UnimpError("JSRR is not implemented.")
         pc_offset_11 = instruction & 0x7ff
 
         self.registers.gprs[7] = self.registers.pc.value
