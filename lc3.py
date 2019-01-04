@@ -112,26 +112,19 @@ class lc3():
             self.registers.cond = condition_flags.p
 
     def dump_state(self):
-        print("\npc: {:04x}".format(self.registers.pc.value))
-        print("r0: {:05} ".format(self.registers.gprs[0]), end='')
-        print("r1: {:05} ".format(self.registers.gprs[1]), end='')
-        print("r2: {:05} ".format(self.registers.gprs[2]), end='')
-        print("r3: {:05} ".format(self.registers.gprs[3]), end='')
-        print("r4: {:05} ".format(self.registers.gprs[4]), end='')
-        print("r5: {:05} ".format(self.registers.gprs[5]), end='')
-        print("r6: {:05} ".format(self.registers.gprs[6]), end='')
-        print("r7: {:05} ".format(self.registers.gprs[7]))
-
-        print("r0:  {:04x} ".format(c_uint16(self.registers.gprs[0]).value), end='')
-        print("r1:  {:04x} ".format(c_uint16(self.registers.gprs[1]).value), end='')
-        print("r2:  {:04x} ".format(c_uint16(self.registers.gprs[2]).value), end='')
-        print("r3:  {:04x} ".format(c_uint16(self.registers.gprs[3]).value), end='')
-        print("r4:  {:04x} ".format(c_uint16(self.registers.gprs[4]).value), end='')
-        print("r5:  {:04x} ".format(c_uint16(self.registers.gprs[5]).value), end='')
-        print("r6:  {:04x} ".format(c_uint16(self.registers.gprs[6]).value), end='')
-        print("r7:  {:04x} ".format(c_uint16(self.registers.gprs[7]).value))
-
+        print('\n--- Processor State ---')
+        print("pc: {:04x}".format(self.registers.pc.value), end='  ')
         print("cond: {}".format(condition_flags(self.registers.cond.value).name))
+
+        # decimal
+        for i in range(8):
+            print("r{}: {:05} ".format(i, self.registers.gprs[i]), end='')
+        print()
+
+        # hex
+        for i in range(8):
+            print("r{}:  {:04x} ".format(i, c_uint16(self.registers.gprs[0]).value), end='')
+        print()
 
     def op_add_impl(self, instruction):
         sr1 = (instruction >> 6) & 0b111
