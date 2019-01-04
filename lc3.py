@@ -106,9 +106,9 @@ class lc3():
     def update_flags(self, reg):
         if self.registers.gprs[reg] == 0:
             self.registers.cond = condition_flags.z
-        if self.registers.gprs[reg] < 0:
+        elif self.registers.gprs[reg] < 0:
             self.registers.cond = condition_flags.n
-        if self.registers.gprs[reg] > 0:
+        elif self.registers.gprs[reg] > 0:
             self.registers.cond = condition_flags.p
 
     def dump_state(self):
