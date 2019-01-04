@@ -17,6 +17,7 @@ from enum import IntEnum
 from struct import unpack
 from sys import exit, stdin, stdout, argv
 from signal import signal, SIGINT
+from array import array
 import lc3disas # in same dir
 
 DEBUG = False
@@ -69,7 +70,8 @@ class condition_flags(IntEnum):
 
 class lc3():
     def __init__(self, filename):
-        self.memory = memory()
+        # create an array of 16b unsigned locations
+        self.memory = array('H', [0]*65536)
         self.registers = registers()
         self.registers.pc.value = 0x3000 # default program starting location
         self.read_program_from_file(filename)
@@ -89,7 +91,7 @@ class lc3():
             _ = f.read(2) # skip the first two byte which specify where code should be mapped
             c = f.read()  # todo support arbitrary load locations
         for count in range(0,len(c), 2):
-            self.memory[0x3000+count/2] = unpack( '>H', c[count:count+2] )[0]
+            self.memory[int(0x3000+count/2)] = unpack( '>H', c[count:count+2] )[0]
 
     def update_flags(self, reg):
         if self.registers.gprs[reg] == 0:
@@ -277,7 +279,7 @@ class lc3():
                 input()
 
             try:
-                self.opcode_funcs[opcode](instruction)
+                self._opcode_funcs[opcode](instruction)
             except KeyError:
                 raise NotImplementedError("invalid opcode")
 
