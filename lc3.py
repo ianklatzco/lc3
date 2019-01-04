@@ -46,13 +46,13 @@ class memory():
 
     def __getitem__(self, arg):
         if (arg > 65535) or (arg < 0):
-            raise MemoryError("Accessed out valid memory range.")
+            raise IndexError("Accessed out valid memory range.")
 
         return self.memory[arg]
 
     def __setitem__(self, location, thing_to_write):
         if (location > 65536) or (location < 0):
-            raise MemoryError("Accessed out valid memory range.")
+            raise IndexError("Accessed out valid memory range.")
 
         self.memory[int(location)] = thing_to_write
 
