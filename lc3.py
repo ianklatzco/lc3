@@ -62,25 +62,6 @@ class registers():
         self.pc = (c_uint16)()
         self.cond = (c_uint16)()
 
-# not actually a class but an enum.
-class opcodes(IntEnum):
-    op_br = 0
-    op_add = 1
-    op_ld = 2
-    op_st = 3
-    op_jsr = 4
-    op_and = 5
-    op_ldr = 6
-    op_str = 7
-    op_rti = 8
-    op_not = 9
-    op_ldi = 10
-    op_sti = 11
-    op_jmp = 12
-    op_res = 13
-    op_lea = 14
-    op_trap = 15
-
 class condition_flags(IntEnum):
     p = 0
     z = 1
