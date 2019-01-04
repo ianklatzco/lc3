@@ -21,9 +21,6 @@ import lc3disas # in same dir
 
 DEBUG = False
 
-class UnimpError(Exception):
-    pass
-
 def signal_handler(signal, frame):
     print("\nbye!")
     exit()
@@ -177,7 +174,7 @@ class lc3():
 
     def op_jsr_impl(self, instruction):
         # no jsrr?
-        if (0x0800 & instruction) == 0x0800: raise UnimpError("JSRR is not implemented.")
+        if (0x0800 & instruction) == 0x0800: raise NotImplementedError("JSRR is not implemented.")
         pc_offset_11 = instruction & 0x7ff
 
         self.registers.gprs[7] = self.registers.pc.value
@@ -267,9 +264,9 @@ class lc3():
         raise ValueError("undefined trap vector {}".format(hex(trap_vector)))
 
     def op_res_impl(self, instruction):
-        raise UnimpError("unimplemented opcode")
+        raise NotImplementedError("unimplemented opcode")
     def op_rti_impl(self, instruction):
-        raise UnimpError("unimplemented opcode")
+        raise NotImplementedError("unimplemented opcode")
 
     def start(self):
         while True:
@@ -311,7 +308,7 @@ class lc3():
             try:
                 opcode_dict[opcode](instruction)
             except KeyError:
-                raise UnimpError("invalid opcode")
+                raise NotImplementedError("invalid opcode")
 
 ##############################################################################
 
