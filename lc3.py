@@ -80,7 +80,9 @@ class lc3():
 
         # This feels like mixing code & data. I guess, since it's not using user input/
         # not within threat model / not being dynamically generated, that's fine.
-        self.opcode_funcs = [ getattr(self, f'op_{op}_impl') for op in self.opcode_names ]
+        #
+        # Underscored b/c they're not meant to be called externally.
+        self._opcode_funcs = [ getattr(self, f'op_{op}_impl') for op in self.opcode_names ]
 
     def read_program_from_file(self,filename):
         with open(filename, 'rb') as f:
