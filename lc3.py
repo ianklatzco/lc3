@@ -35,31 +35,9 @@ def sext(value, bits):
     sign_bit = 1 << (bits - 1)
     return (value & (sign_bit - 1)) - (value & sign_bit)
 
-'''
-iirc the arch is 16bit little endian.
-options: ctypes or just emulate it in pure python.
-chose: ctypes
-'''
-class memory():
-    def __init__(self):
-        # ctypes has an array type. this is one way to create instances of it.
-        self.memory = (c_uint16 * 65536)()
-
-    def __getitem__(self, arg):
-        if (arg > 65535) or (arg < 0):
-            raise IndexError("Accessed out valid memory range.")
-
-        return self.memory[arg]
-
-    def __setitem__(self, location, thing_to_write):
-        if (location > 65536) or (location < 0):
-            raise IndexError("Accessed out valid memory range.")
-
-        self.memory[int(location)] = thing_to_write
-
 class registers():
     def __init__(self):
-        self.gprs = (c_int16 * 8)()
+        self.gprs = array('h', [0]*10)
         self.pc = (c_uint16)()
         self.cond = (c_uint16)()
 
