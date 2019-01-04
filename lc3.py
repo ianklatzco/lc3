@@ -92,25 +92,14 @@ class lc3():
         self.registers = registers()
         self.registers.pc.value = 0x3000 # default program starting location
         self.read_program_from_file(filename)
-        self.opcode_dict = \
-        {
-            opcodes.op_add: self.op_add_impl,
-            opcodes.op_and: self.op_and_impl,
-            opcodes.op_not: self.op_not_impl,
-            opcodes.op_br:  self.op_br_impl,
-            opcodes.op_jmp: self.op_jmp_impl,
-            opcodes.op_jsr: self.op_jsr_impl,
-            opcodes.op_ld:  self.op_ld_impl,
-            opcodes.op_ldi: self.op_ldi_impl,
-            opcodes.op_ldr: self.op_ldr_impl,
-            opcodes.op_lea: self.op_lea_impl,
-            opcodes.op_st:  self.op_st_impl,
-            opcodes.op_sti: self.op_sti_impl,
-            opcodes.op_str: self.op_str_impl,
-            opcodes.op_trap:self.op_trap_impl,
-            opcodes.op_res: self.op_res_impl,
-            opcodes.op_rti: self.op_rti_impl
-        }
+
+        # the indexes are the same as the decimal representation.
+        # i.e. order in this list matters.
+        self.opcode_names = ['br','add','ld','st','jsr','and','ldr','str','rti','not','ldi','sti','jmp','res','lea','trap']
+
+        # This feels like mixing code & data. I guess, since it's not using user input/
+        # not within threat model / not being dynamically generated, that's fine.
+        self.opcode_funcs = [ getattr(self, f'op_{op}_impl') for op in self.opcode_names ]
 
     def read_program_from_file(self,filename):
         with open(filename, 'rb') as f:
@@ -305,7 +294,7 @@ class lc3():
                 input()
 
             try:
-                self.opcode_dict[opcode](instruction)
+                self.opcode_funcs[opcode](instruction)
             except KeyError:
                 raise NotImplementedError("invalid opcode")
 
